@@ -179,7 +179,7 @@ class MongoDBCollectionStream(Stream):
             Record message objects.
         """
         extracted_at: DateTime = record.pop("_sdc_extracted_at", utc_now())
-        pop_deselected_record_properties(record, self.schema, self.mask, self.logger)
+        pop_deselected_record_properties(record, self.schema, self.mask)
         record = conform_record_data_types(
             stream_name=self.name,
             record=record,
