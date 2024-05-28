@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import json
+import simplejson as json
 import sys
 from typing import Any, Optional
 from urllib.parse import quote_plus
