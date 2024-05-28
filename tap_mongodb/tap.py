@@ -12,6 +12,7 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 
 from tap_mongodb.connector import MongoDBConnector
 from tap_mongodb.streams import MongoDBCollectionStream
+from singer_sdk._singerlib.messages import Message, _default_encoding
 
 if sys.version_info[:2] >= (3, 7):
     from backports.cached_property import cached_property
@@ -241,6 +242,23 @@ class TapMongoDB(Tap):
             MongoDBCollectionStream(self, catalog_entry, connector=self.connector)
             for catalog_entry in self.catalog_dict["streams"]
         ]
+    
+    def write_message(self, message: Message) -> None:  # noqa: PLR6301
+        """Write a message to stdout.
+
+        Args:
+            message: The message to write.
+        """        
+        sys.stdout.write(
+            json.dumps(
+                message.to_dict(),
+                use_decimal=True,
+                default=_default_encoding,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            ) + "\n"
+        )
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":
