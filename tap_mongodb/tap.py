@@ -248,17 +248,29 @@ class TapMongoDB(Tap):
 
         Args:
             message: The message to write.
-        """        
+        """
+
+        def _safe_str(obj):
+            if isinstance(obj, bytes):
+                return obj.decode('utf-8', errors='replace')
+            if isinstance(obj, str):
+                return obj
+            if isinstance(obj, dict):
+                return {k: _safe_str(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [_safe_str(v) for v in obj]
+            return obj
+
+        safe_message = _safe_str(message.to_dict())
         sys.stdout.write(
             json.dumps(
-                message.to_dict(),
+                safe_message,
                 use_decimal=True,
                 default=_default_encoding,
                 separators=(",", ":"),
                 ensure_ascii=False,
             ) + "\n"
         )
-        sys.stdout.flush()
 
 
 if __name__ == "__main__":
