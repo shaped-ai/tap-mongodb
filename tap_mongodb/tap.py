@@ -6,6 +6,7 @@ import simplejson as json
 import sys
 from typing import Any, Optional
 from urllib.parse import quote_plus
+from math import isnan, isinf
 
 from singer_sdk import Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
@@ -253,12 +254,15 @@ class TapMongoDB(Tap):
         def _safe_str(obj):
             if isinstance(obj, bytes):
                 return obj.decode('utf-8', errors='replace')
-            if isinstance(obj, str):
+            elif isinstance(obj, str):
                 return obj
-            if isinstance(obj, dict):
+            elif isinstance(obj, dict):
                 return {k: _safe_str(v) for k, v in obj.items()}
-            if isinstance(obj, list):
+            elif isinstance(obj, list):
                 return [_safe_str(v) for v in obj]
+            # Convert NaN and Infinity to 0.0
+            elif isinstance(obj, float) and (isnan(obj) or isinf(obj)):
+                return 0.0
             return obj
 
         safe_message = _safe_str(message.to_dict())
