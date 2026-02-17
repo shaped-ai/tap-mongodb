@@ -1,0 +1,23 @@
+tap_mongodb/tap.py
+  0f88c2b9c3b37d42 268-273,279
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.3",
+  "base_commit_sha": "5875a7d580c7db5538d65c9a7c5e603f535769fe",
+  "prompts": {
+    "0f88c2b9c3b37d42": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "476dc2ed-b669-4f4b-a1cd-579ef9392335",
+        "model": "default"
+      },
+      "human_author": "Karl Lyons <karl@shaped.ai>",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 2,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
