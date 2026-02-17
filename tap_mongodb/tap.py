@@ -4,16 +4,19 @@ from __future__ import annotations
 
 import simplejson as json
 import sys
+from datetime import date, datetime
+from decimal import Decimal
+from math import isnan, isinf
 from typing import Any, Optional
 from urllib.parse import quote_plus
-from math import isnan, isinf
 
+from bson.objectid import ObjectId
 from singer_sdk import Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
+from singer_sdk.singerlib.messages import Message
 
 from tap_mongodb.connector import MongoDBConnector
 from tap_mongodb.streams import MongoDBCollectionStream
-from singer_sdk._singerlib.messages import Message
 
 if sys.version_info[:2] >= (3, 7):
     from backports.cached_property import cached_property
@@ -243,7 +246,7 @@ class TapMongoDB(Tap):
             MongoDBCollectionStream(self, catalog_entry, connector=self.connector)
             for catalog_entry in self.catalog_dict["streams"]
         ]
-    
+
     def write_message(self, message: Message) -> None:  # noqa: PLR6301
         """Write a message to stdout.
 
@@ -253,7 +256,7 @@ class TapMongoDB(Tap):
 
         def _safe_str(obj):
             if isinstance(obj, bytes):
-                return obj.decode('utf-8', errors='replace')
+                return obj.decode("utf-8", errors="replace")
             elif isinstance(obj, str):
                 return obj
             elif isinstance(obj, dict):
@@ -265,10 +268,17 @@ class TapMongoDB(Tap):
                 return 0.0
             return obj
 
-        def _json_default(obj):
-            """Handle non-JSON-serializable types (e.g. datetime from message)."""
-            if hasattr(obj, "isoformat"):
+        def _json_default(obj: Any) -> Any:
+            """
+            JSON serializer for objects not serializable by default (replaces
+            deprecated _default_encoding).
+            """
+            if isinstance(obj, (datetime, date)):
                 return obj.isoformat()
+            if isinstance(obj, Decimal):
+                return str(obj)
+            if isinstance(obj, ObjectId):
+                return str(obj)
             raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
         safe_message = _safe_str(message.to_dict())
@@ -279,7 +289,8 @@ class TapMongoDB(Tap):
                 default=_json_default,
                 separators=(",", ":"),
                 ensure_ascii=False,
-            ) + "\n"
+            )
+            + "\n"
         )
 
 
