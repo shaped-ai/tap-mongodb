@@ -13,7 +13,7 @@ from urllib.parse import quote_plus
 from bson.objectid import ObjectId
 from singer_sdk import Tap
 from singer_sdk import typing as th  # JSON schema typing helpers
-from singer_sdk.singerlib.messages import Message
+from singer_sdk._singerlib.messages import Message
 
 from tap_mongodb.connector import MongoDBConnector
 from tap_mongodb.streams import MongoDBCollectionStream
