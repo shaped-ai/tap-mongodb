@@ -13,7 +13,7 @@ from singer_sdk import typing as th  # JSON schema typing helpers
 
 from tap_mongodb.connector import MongoDBConnector
 from tap_mongodb.streams import MongoDBCollectionStream
-from singer_sdk._singerlib.messages import Message, _default_encoding
+from singer_sdk._singerlib.messages import Message
 
 if sys.version_info[:2] >= (3, 7):
     from backports.cached_property import cached_property
@@ -265,12 +265,18 @@ class TapMongoDB(Tap):
                 return 0.0
             return obj
 
+        def _json_default(obj):
+            """Handle non-JSON-serializable types (e.g. datetime from message)."""
+            if hasattr(obj, "isoformat"):
+                return obj.isoformat()
+            raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
         safe_message = _safe_str(message.to_dict())
         sys.stdout.write(
             json.dumps(
                 safe_message,
                 use_decimal=True,
-                default=_default_encoding,
+                default=_json_default,
                 separators=(",", ":"),
                 ensure_ascii=False,
             ) + "\n"
